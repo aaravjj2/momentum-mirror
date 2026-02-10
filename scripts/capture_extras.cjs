@@ -61,7 +61,19 @@ const path = require('path');
             localStorage.setItem('mm_unlocked_levels', JSON.stringify([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]));
         });
 
-        await page.goto('http://localhost:3001', { waitUntil: 'networkidle0' });
+        console.log('Navigating to http://127.0.0.1:3005...');
+        try {
+            await page.goto('http://127.0.0.1:3005', { waitUntil: 'domcontentloaded', timeout: 30000 });
+            console.log('Navigation complete.');
+        } catch (e) {
+            console.error('Navigation failed:', e);
+            throw e;
+        }
+
+        // Wait for canvas to appear
+        console.log('Waiting for canvas...');
+        await page.waitForSelector('canvas', { timeout: 10000 });
+        console.log('Canvas found.');
 
         // Wait for Menu to load
         await new Promise(r => setTimeout(r, 2000)); // Wait for bounce intro

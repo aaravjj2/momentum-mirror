@@ -1,17 +1,53 @@
 # 🎮 Momentum Mirror
 
-*Physics-Based Ricochet Game with Measurable Skill Mastery*
+[![Live Demo](https://img.shields.io/badge/demo-live-success)](https://momentum-mirror.vercel.app)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.4-blue)](https://www.typescriptlang.org/)
+[![Phaser](https://img.shields.io/badge/Phaser-3.90-orange)](https://phaser.io/)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-A browser-based game built with **Phaser 3**, **Matter.js**, **TypeScript**, and **Vite** that tests your motor skills through momentum-based physics puzzles.
+> *Physics-Based Ricochet Game with Measurable Skill Mastery*
+
+A browser-based momentum physics game built with **Phaser 3**, **Matter.js**, **TypeScript**, and **Vite**. Master the art of momentum manipulation through 40 challenging levels that test your precision, timing, and physics intuition.
+
+🎮 **[Play Now](https://momentum-mirror.vercel.app)**
+
+## ✨ Features
+
+### Core Gameplay
+- 🎯 **40 Unique Levels** across 6 categories (Tutorial, Efficiency, Rhythm, Precision, Hybrid, Master)
+- 🔴 **5 Surface Types** with distinct physics: Standard, Spring, Cushion, Curved, and Phase walls
+- 📊 **4-Metric Skill System** providing quantifiable feedback on your mastery
+- 🎵 **Dynamic Audio** with procedural sound effects and ambient background music
+- 🏆 **Personal Leaderboards** tracking your best scores per level
+- 💾 **Progress Persistence** via LocalStorage
+
+### Technical Highlights
+- ⚡ **60 FPS** deterministic physics with Matter.js
+- 🎨 **Modern UI** with particle effects, trails, and smooth animations
+- 📱 **Responsive Design** works on desktop and mobile (touch support)
+- 🌐 **100% Client-Side** - no backend required
+- ⚙️ **TypeScript** strict mode for type safety
 
 ## 🚀 Quick Start
 
+### Play Online
+Visit **[momentum-mirror.vercel.app](https://momentum-mirror.vercel.app)** and start playing immediately!
+
+### Local Development
+
 ```bash
+# Clone the repository
+git clone https://github.com/aaravjj2/momentum-mirror.git
+cd momentum-mirror
+
+# Install dependencies
 npm install
+
+# Run development server
 npm run dev
 ```
 
-Open http://localhost:3000 (or the port shown) in your browser.
+Open http://localhost:5173 (or the port shown) in your browser.
 
 ## 🎯 How to Play
 
@@ -47,23 +83,23 @@ Your mastery is measured across four dimensions:
 
 ## 📚 Level Categories
 
-### 🎓 Tutorial (1-5)
-Master the basics: swipe, bounce, surfaces, precision
+### 🎓 Tutorial (Levels 1-5)
+Master the basics: swipe mechanics, bounces, surfaces, and precision control
 
-### 🎯 Efficiency (6-10)
-Optimize your path with minimal force
+### 🎯 Efficiency (Levels 6-10)
+Optimize your path with minimal force - economy of motion
 
-### 🎵 Rhythm (11-15)
-Phase walls demand perfect timing
+### 🎵 Rhythm (Levels 11-15)
+Phase walls demand perfect timing - master the beat
 
-### 🎪 Precision (16-20)
-Thread needles at high speed
+### 🎪 Precision (Levels 16-20)
+Thread needles at high speed - zero margin for error
 
-### 🌟 Hybrid (21-25)
-All mechanics combined
+### 🌟 Hybrid (Levels 21-30)
+All mechanics combined - complex puzzle solving
 
-### 🏆 Advanced (26-30)
-Ultimate challenges for masters
+### 👑 Master (Levels 31-40)
+Ultimate challenges - only the best survive these gauntlets
 
 ## 🧪 Manual Testing Guide
 
@@ -198,39 +234,59 @@ npm run preview
 
 ## 🎨 Design Principles
 
-1. **Physically Felt Interaction**: Immediate, satisfying feedback
-2. **Low Floor, High Ceiling**: Easy to learn, hard to master
-3. **Measurable Compression**: Skill leaves numerical fingerprints
+1. **Physically Felt Interaction**: Immediate, satisfying feedback on every action
+2. **Low Floor, High Ceiling**: Easy to learn, infinitely difficult to master
+3. **Measurable Compression**: Your skill leaves numerical fingerprints
 4. **Metric Coupling**: No single metric can be optimized independently
-5. **Motor > Cognitive**: Improvement from finger skill, not planning
+5. **Motor > Cognitive**: Improvement comes from finger skill, not just planning
 
-## 🐛 Known Limitations
+## 🎵 Audio System
 
-- No sound/music implementation
-- Phase walls use visual toggling (no smooth fade)
-- Curved wall deflection is simplified
-- No online leaderboards
-- No level editor
-- Agent testing framework not implemented
+The game features a **procedurally generated audio system** using the Web Audio API:
+
+- **Swipe Sounds**: Pitch scales with power (200-400 Hz)
+- **Collision Sounds**: Different waveforms for each surface type
+  - Standard: Sine wave (150 Hz base)
+  - Spring: Triangle wave (300 Hz)
+  - Cushion: Soft sine (100 Hz)
+  - Curved: Square wave (250 Hz)
+  - Phase: Sawtooth (400 Hz)
+- **Goal Celebration**: Harmonic chord progression (C5, E5, G5)
+- **Ambient Music**: Layered sine waves with LFO modulation for atmospheric background
+- **UI Sounds**: Click and hover feedback
+
+All audio is generated in real-time - no audio files needed!
+
+## ⚠️ Known Limitations
+
+- Phase walls use instant toggling (no smooth fade transitions)
+- Curved wall deflection uses simplified angular rotation
+- Local leaderboards only (no online global leaderboards)
+- No level editor or custom level support
+- Audio system uses Web Audio API (no external audio files)
 
 ## 📝 Implementation Status
 
 **✅ Fully Implemented:**
-- Core swipe mechanics
-- Deterministic physics (Matter.js)
-- 30 challenging levels
-- 4-metric skill tracking system
-- All 5 surface types
-- Progress persistence
-- Visual effects & polish
-- Responsive UI
+- Core swipe mechanics with trajectory preview
+- Deterministic physics (Matter.js, 60 FPS)
+- **40 challenging levels** across 6 categories
+- 4-metric skill tracking system with real-time HUD
+- All 5 surface types with distinct physics
+- **Procedural audio system** (swipe, collision, goal sounds)
+- **Ambient background music** with Web Audio API
+- **Personal leaderboard** with progress tracking
+- Progress persistence via LocalStorage
+- Visual effects (particles, trails, glow animations)
+- Responsive UI with touch support
+- Audio controls (mute music/SFX)
 
 **❌ Not Implemented:**
-- Agent testing framework (Playwright)
+- Agent testing framework (Playwright) - for QA automation
 - Learning detection algorithms
-- Online features (leaderboards, sharing)
-- Sound effects / music
+- Online global leaderboards (backend required)
 - Level editor
+- Replay sharing system
 
 ## 🎯 Success Criteria (from Spec)
 
@@ -241,21 +297,36 @@ npm run preview
 ✅ Deterministic physics for reliable testing  
 ✅ Performance: 60 FPS maintained  
 
+## 🤝 Contributing
+
+This is an educational project, but contributions are welcome! Feel free to:
+- Report bugs or issues
+- Suggest new level designs
+- Improve the audio system
+- Add new features
+
 ## 📄 License
 
-This is an educational implementation of the Momentum Mirror design specification (February 10, 2026).
+MIT License - feel free to use this code for learning and educational purposes.
 
 ## 🎮 Start Playing!
 
+**🌐 Online**: [momentum-mirror.vercel.app](https://momentum-mirror.vercel.app)
+
+**💻 Local**:
 ```bash
+git clone https://github.com/aaravjj2/momentum-mirror.git
+cd momentum-mirror
 npm install
 npm run dev
 ```
 
-Navigate to the displayed URL and click **PLAY** to begin your momentum-mastery journey!
-
 ---
 
 **Target Audience**: Skill-focused gamers, speedrunners, physics puzzle enthusiasts  
+**Estimated Playtime**: 3-6 hours to complete all 40 levels  
+**Skill Ceiling**: Infinite — optimizing for master-level metrics never ends
+
+Built with ❤️ using Phaser 3, Matter.js, TypeScript, and Web Audio API
 **Estimated Playtime**: 2-4 hours to complete all 30 levels  
 **Skill Ceiling**: Infinite — optimizing for world-class metrics never ends

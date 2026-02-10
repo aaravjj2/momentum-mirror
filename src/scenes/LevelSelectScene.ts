@@ -9,7 +9,8 @@ const CATEGORY_COLORS: Record<LevelCategory, number> = {
   efficiency: 0x2ecc71,
   rhythm: 0x9b59b6,
   precision: 0xe74c3c,
-  hybrid: 0xf39c12,  master: 0xf1c40f,};
+  hybrid: 0xf39c12, master: 0xf1c40f,
+};
 
 const CATEGORY_LABELS: Record<LevelCategory, string> = {
   tutorial: 'Tutorial',
@@ -136,7 +137,7 @@ export class LevelSelectScene extends Phaser.Scene {
     x: number, y: number, w: number, h: number,
     level: typeof LEVELS[0], categoryColor: number
   ): void {
-    const unlocked = isLevelUnlocked(level.id);
+    const unlocked = true; // FORCE UNLOCK FOR CAPTURE
     const best = getBestScore(level.id);
     const isCompleted = best !== null;
 

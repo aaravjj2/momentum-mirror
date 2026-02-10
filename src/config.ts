@@ -74,12 +74,16 @@ export const SKILL_RATINGS = [
 
 // ─── Scene Keys ──────────────────────────────────────────────
 export const SCENES = {
-  BOOT: 'BootScene',
-  MENU: 'MenuScene',
-  LEVEL_SELECT: 'LevelSelectScene',
-  LEADERBOARD: 'LeaderboardScene',
-  GAME: 'GameScene',
-  RESULTS: 'ResultsScene',
+  BOOT: 'BOOT',
+  MENU: 'MENU',
+  LEVEL_SELECT: 'LEVEL_SELECT',
+  LEADERBOARD: 'LEADERBOARD',
+  ACHIEVEMENTS: 'ACHIEVEMENTS',
+  STATISTICS: 'STATISTICS',
+  LEVEL_EDITOR: 'LEVEL_EDITOR',
+  CUSTOM_LEVELS: 'CUSTOM_LEVELS',
+  GAME: 'GAME',
+  RESULTS: 'RESULTS',
 } as const;
 
 // ─── Game Events ─────────────────────────────────────────────

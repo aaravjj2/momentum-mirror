@@ -4,6 +4,10 @@ import { BootScene } from './scenes/BootScene';
 import { MenuScene } from './scenes/MenuScene';
 import { LevelSelectScene } from './scenes/LevelSelectScene';
 import { LeaderboardScene } from './scenes/LeaderboardScene';
+import { AchievementsScene } from './scenes/AchievementsScene';
+import { StatisticsScene } from './scenes/StatisticsScene';
+import { LevelEditorScene } from './scenes/LevelEditorScene';
+import { CustomLevelsScene } from './scenes/CustomLevelsScene';
 import { GameScene } from './scenes/GameScene';
 import { ResultsScene } from './scenes/ResultsScene';
 
@@ -24,7 +28,18 @@ const config: Phaser.Types.Core.GameConfig = {
       debug: false,
     },
   },
-  scene: [BootScene, MenuScene, LevelSelectScene, LeaderboardScene, GameScene, ResultsScene],
+  scene: [
+    BootScene,
+    MenuScene,
+    LevelSelectScene,
+    LeaderboardScene,
+    AchievementsScene,
+    StatisticsScene,
+    LevelEditorScene,
+    CustomLevelsScene,
+    GameScene,
+    ResultsScene,
+  ],
   render: {
     antialias: true,
     pixelArt: false,

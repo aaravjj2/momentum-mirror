@@ -10,6 +10,7 @@ const CATEGORY_COLORS: Record<LevelCategory, number> = {
   rhythm: 0x9b59b6,
   precision: 0xe74c3c,
   hybrid: 0xf39c12, master: 0xf1c40f,
+  custom: 0x95a5a6,
 };
 
 const CATEGORY_LABELS: Record<LevelCategory, string> = {
@@ -19,6 +20,7 @@ const CATEGORY_LABELS: Record<LevelCategory, string> = {
   precision: 'Precision',
   hybrid: 'Hybrid',
   master: 'Master',
+  custom: 'Custom',
 };
 
 export class LevelSelectScene extends Phaser.Scene {

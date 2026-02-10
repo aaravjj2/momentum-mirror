@@ -67,12 +67,19 @@ export type LevelCategory =
   | 'rhythm'
   | 'precision'
   | 'hybrid'
-  | 'master';
+  | 'master'
+  | 'custom';
 
-export interface PhaseWallDefinition extends WallDefinition {
+export interface PhaseWallDefinition {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  angle?: number;
   period: number;
   phaseOffset: number;
   onDuration: number;
+  surfaceType: SurfaceType;
 }
 
 export interface MetricsSnapshot {

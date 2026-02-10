@@ -184,14 +184,14 @@ export class ResultsScene extends Phaser.Scene {
 
     // Retry
     this.createButton(cx - 250, btnY, '↻  RETRY', 0xff6b6b, () => {
-      this.scene.start(SCENES.GAME, { levelId: this.levelId });
+      this.scene.start(SCENES.GAME, { levelId: this.levelId, isRetry: true });
     });
 
     // Next Level
     const nextLevel = getLevelById(this.levelId + 1);
     if (nextLevel) {
       this.createButton(cx, btnY, '▶  NEXT LEVEL', 0x00ffff, () => {
-        this.scene.start(SCENES.GAME, { levelId: this.levelId + 1 });
+        this.scene.start(SCENES.GAME, { levelId: this.levelId + 1, isRetry: false });
       });
     }
 

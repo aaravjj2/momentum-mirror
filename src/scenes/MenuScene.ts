@@ -93,8 +93,32 @@ export class MenuScene extends Phaser.Scene {
       this.scene.start(SCENES.LEADERBOARD);
     });
 
+    // Achievements button
+    const achievementsBtn = this.createButton(cx - 220, cy + 210, '🏅  ACHIEVEMENTS', 0xe67e22, () => {
+      getAudioManager().playClick();
+      this.scene.start(SCENES.ACHIEVEMENTS);
+    });
+
+    // Statistics button
+    const statisticsBtn = this.createButton(cx + 220, cy + 210, '📊  STATISTICS', 0x3498db, () => {
+      getAudioManager().playClick();
+      this.scene.start(SCENES.STATISTICS);
+    });
+
+    // Level Editor button
+    const editorBtn = this.createButton(cx - 220, cy + 290, '✏️  LEVEL EDITOR', 0x9b59b6, () => {
+      getAudioManager().playClick();
+      this.scene.start(SCENES.LEVEL_EDITOR);
+    });
+
+    // Custom Levels button
+    const customBtn = this.createButton(cx + 220, cy + 290, '📁  CUSTOM LEVELS', 0xe67e22, () => {
+      getAudioManager().playClick();
+      this.scene.start(SCENES.CUSTOM_LEVELS);
+    });
+
     // How to play
-    const howBtn = this.createButton(cx, cy + 210, '?  HOW TO PLAY', 0x4a90d9, () => {
+    const howBtn = this.createButton(cx, cy + 370, '?  HOW TO PLAY', 0x4a90d9, () => {
       this.showHowToPlay();
     });
 

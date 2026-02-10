@@ -19,6 +19,10 @@ A browser-based momentum physics game built with **Phaser 3**, **Matter.js**, **
 - 📊 **4-Metric Skill System** providing quantifiable feedback on your mastery
 - 🎵 **Dynamic Audio** with procedural sound effects and ambient background music
 - 🏆 **Personal Leaderboards** tracking your best scores per level
+- ✏️ **Level Editor** - Create custom levels with visual editor tools
+- 📁 **Custom Levels** - Save, play, share, and import community levels
+- 🏅 **Achievements System** - 28 achievements across 5 categories
+- 📊 **Statistics Dashboard** - Comprehensive gameplay analytics
 - 💾 **Progress Persistence** via LocalStorage
 
 ### Technical Highlights
@@ -101,6 +105,76 @@ All mechanics combined - complex puzzle solving
 ### 👑 Master (Levels 31-40)
 Ultimate challenges - only the best survive these gauntlets
 
+## ✏️ Level Editor & Custom Levels
+
+### Creating Custom Levels
+1. **Launch Editor**: Click "✏️ LEVEL EDITOR" from the main menu
+2. **Place Objects**:
+   - ⚪ **Player Tool**: Click to set player start position
+   - ⭐ **Goal Tool**: Click to place the goal
+   - ▬ **Wall Tool**: Click and drag to create walls
+   - ◈ **Phase Tool**: Click and drag to create phase walls
+3. **Select Surface Type**: Choose from Standard, Spring, Cushion, or Curved
+4. **Test Level**: Click "TEST" to play your level immediately
+5. **Save Level**: Click "SAVE" and enter level name, author, and description
+6. **Clear Level**: Click "CLEAR" to start over
+
+### Custom Levels Browser
+1. **View Levels**: Click "📁 CUSTOM LEVELS" from the main menu
+2. **Play Levels**: Click "PLAY ▶" on any level card
+3. **Edit Levels**: Click "EDIT ✏" to modify existing levels
+4. **Export/Import**:
+   - **Export**: Click "EXPORT" to copy JSON to clipboard
+   - **Import**: Click "IMPORT LEVEL" and paste shared JSON
+5. **Delete Levels**: Click "DELETE" to permanently remove levels
+
+### Level Validation
+All levels are automatically validated before save:
+- ✅ Player start and goal positions required
+- ✅ At least one wall required
+- ✅ All positions within bounds (1920x1080)
+- ✅ Wall dimensions must be positive
+- ✅ Phase wall properties must be valid
+
+### Sharing Levels
+Export your level as JSON and share with friends! They can import it into their browser and play immediately. Level data includes:
+- Level name, author, and description
+- Player start and goal positions
+- All wall definitions with surface types
+- Phase wall configurations
+
+**See [LEVEL_EDITOR_IMPLEMENTATION.md](./LEVEL_EDITOR_IMPLEMENTATION.md) for complete documentation.**
+
+## 🏅 Achievements System
+
+### 28 Achievements Across 5 Categories
+
+**🏁 Progress** (7 achievements)
+- First Victory, Level Explorer, Half Way, Advanced Player, Master Challenger, Completionist, Perfect Progress
+
+**🎯 Mastery** (6 achievements)
+- Perfectionist, Unstoppable, Master Class, Efficiency Expert, Rhythm Master, Conservation King
+
+**⚡ Skill** (6 achievements)
+- Speed Demon, Precision Strike, First Try, Flawless Victory, Hat Trick, Path Optimizer
+
+**💪 Challenge** (5 achievements)
+- Persistent, Comeback Kid, Trial by Fire, Never Give Up, Speed Runner
+
+**✨ Special** (4 achievements)
+- Early Bird, Night Owl, Marathon Session, Score Chaser
+
+### Statistics Dashboard
+Track your gameplay with comprehensive statistics:
+- **Time Stats**: Total playtime, fastest level, average time
+- **Gameplay Stats**: Levels completed, goals reached, retries, success rate
+- **Input Stats**: Total swipes, bounces, averages per level
+- **Distance Stats**: Total distance, averages, efficiency metrics
+- **Mastery Stats**: Perfect scores, master ratings, expert completions
+- **Personal Records**: Highest score, average score, perfection rate
+
+**See [ACHIEVEMENTS_IMPLEMENTATION.md](./ACHIEVEMENTS_IMPLEMENTATION.md) for complete details.**
+
 ## 🧪 Manual Testing Guide
 
 ### Test Each Level Category:
@@ -181,15 +255,28 @@ src/
 ├── scenes/
 │   ├── BootScene.ts    # Loading screen
 │   ├── MenuScene.ts    # Main menu
-│   ├── LevelSelectScene.ts  # Level picker
+│   ├── LevelSelectScene.ts     # Level picker
+│   ├── LevelEditorScene.ts     # Visual level editor
+│   ├── CustomLevelsScene.ts    # Custom levels browser
+│   ├── AchievementsScene.ts    # Achievements display
+│   ├── StatisticsScene.ts      # Statistics dashboard
+│   ├── LeaderboardScene.ts     # Personal best scores
 │   ├── GameScene.ts    # Core gameplay
 │   └── ResultsScene.ts # Metrics display
 ├── levels/
-│   └── LevelData.ts    # 30 level definitions
+│   └── LevelData.ts    # 40 level definitions
+├── editor/
+│   └── CustomLevelsManager.ts  # Custom level CRUD + validation
+├── achievements/
+│   └── AchievementsManager.ts  # Achievement tracking
 ├── metrics/
 │   └── MetricsEngine.ts # 4-metric tracking system
+├── audio/
+│   └── AudioManager.ts # Web Audio API procedural sounds
 ├── input/
 │   └── SwipeHandler.ts # Touch/mouse input
+├── ui/
+│   └── AchievementNotification.ts # Achievement popups
 └── utils/
     ├── Vector.ts       # Math utilities
     ├── Storage.ts      # LocalStorage persistence
@@ -262,7 +349,7 @@ All audio is generated in real-time - no audio files needed!
 - Phase walls use instant toggling (no smooth fade transitions)
 - Curved wall deflection uses simplified angular rotation
 - Local leaderboards only (no online global leaderboards)
-- No level editor or custom level support
+- Level Editor: No angle editing, no property panel, no undo/redo
 - Audio system uses Web Audio API (no external audio files)
 
 ## 📝 Implementation Status
@@ -276,6 +363,10 @@ All audio is generated in real-time - no audio files needed!
 - **Procedural audio system** (swipe, collision, goal sounds)
 - **Ambient background music** with Web Audio API
 - **Personal leaderboard** with progress tracking
+- **Achievements System** with 28 unlockable achievements
+- **Statistics Dashboard** with comprehensive gameplay analytics
+- **Level Editor** with visual tools for all game objects
+- **Custom Levels System** with save, play, share, and import functionality
 - Progress persistence via LocalStorage
 - Visual effects (particles, trails, glow animations)
 - Responsive UI with touch support
@@ -285,7 +376,7 @@ All audio is generated in real-time - no audio files needed!
 - Agent testing framework (Playwright) - for QA automation
 - Learning detection algorithms
 - Online global leaderboards (backend required)
-- Level editor
+- Advanced level editor features (property panel, undo/redo, angle editing)
 - Replay sharing system
 
 ## 🎯 Success Criteria (from Spec)

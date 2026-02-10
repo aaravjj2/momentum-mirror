@@ -7,9 +7,11 @@ import {
 import { SwipeHandler } from '../input/SwipeHandler';
 import { MetricsEngine } from '../metrics/MetricsEngine';
 import { ReplayRecorder } from '../utils/Replay';
-import { updateBestScore } from '../utils/Storage';
+import { updateBestScore, getBestScore } from '../utils/Storage';
 import { getLevelById } from '../levels/LevelData';
 import { getAudioManager } from '../audio/AudioManager';
+import { AchievementsManager } from '../achievements/AchievementsManager';
+import { AchievementNotification } from '../ui/AchievementNotification';
 import {
   SwipeData, CollisionData, LevelDefinition, PhaseWallDefinition, Vec2,
 } from '../types';
@@ -27,6 +29,8 @@ export class GameScene extends Phaser.Scene {
   private swipeHandler!: SwipeHandler;
   private metricsEngine!: MetricsEngine;
   private replayRecorder!: ReplayRecorder;
+  private achievementsManager!: AchievementsManager;
+  private achievementNotification!: AchievementNotification;
 
   // ─── Game objects ──────────────────────────────────────
   private player!: Phaser.GameObjects.Arc;
@@ -42,6 +46,7 @@ export class GameScene extends Phaser.Scene {
   private currentLevel: LevelDefinition | null = null;
   private levelStartTime: number = 0;
   private isLevelComplete: boolean = false;
+  private retryCount: number = 0;
   private particles: Array<{
     x: number; y: number; vx: number; vy: number;
     life: number; maxLife: number; color: number; size: number;
@@ -58,12 +63,35 @@ export class GameScene extends Phaser.Scene {
     super({ key: SCENES.GAME });
   }
 
-  init(data: { levelId: number }): void {
-    this.currentLevel = getLevelById(data.levelId) || null;
+  init(data: { levelId: number; isRetry?: boolean; isTestLevel?: boolean; isCustomLevel?: boolean }): void {
+    // Handle test level from editor
+    if (data.isTestLevel) {
+      this.currentLevel = this.registry.get('editorTestLevel') || null;
+    }
+    // Handle custom level playback
+    else if (data.isCustomLevel) {
+      const customLevel = this.registry.get('customLevelToPlay');
+      if (customLevel) {
+        this.currentLevel = customLevel.definition;
+      } else {
+        this.currentLevel = null;
+      }
+    }
+    // Handle regular level
+    else {
+      this.currentLevel = getLevelById(data.levelId) || null;
+    }
+    
     this.isLevelComplete = false;
     this.particles = [];
     this.trailPoints = [];
     this.wallBodies = [];
+    
+    if (data.isRetry) {
+      this.retryCount++;
+    } else {
+      this.retryCount = 0;
+    }
   }
 
   create(): void {
@@ -103,6 +131,18 @@ export class GameScene extends Phaser.Scene {
     this.replayRecorder.start();
 
     this.swipeHandler = new SwipeHandler(this);
+
+    // Initialize achievements
+    this.achievementsManager = AchievementsManager.getInstance();
+    this.achievementNotification = new AchievementNotification(this);
+    this.achievementsManager.registerListener((achievement) => {
+      this.achievementNotification.show(achievement);
+    });
+
+    // Track retries
+    if (this.retryCount > 0) {
+      this.achievementsManager.onLevelRetry(this.retryCount);
+    }
 
     // Listen for swipe events
     this.events.on(EVENTS.SWIPE_END, this.onSwipe, this);
@@ -591,6 +631,30 @@ export class GameScene extends Phaser.Scene {
       if (progress === 1) {
         // Get final metrics
         const metrics = this.metricsEngine.getSnapshot();
+        const completionTime = performance.now() - this.levelStartTime;
+
+        // Track achievements
+        if (this.currentLevel) {
+          // Check for score improvement
+          const oldBest = getBestScore(this.currentLevel.id);
+          if (oldBest && oldBest.compositeScore) {
+            this.achievementsManager.onScoreImprovement(
+              oldBest.compositeScore,
+              metrics.compositeScore
+            );
+          }
+
+          // Track level completion
+          this.achievementsManager.onLevelComplete(
+            this.currentLevel.id,
+            metrics,
+            completionTime,
+            metrics.totalSwipes,
+            metrics.totalBounces,
+            metrics.distanceTraveled,
+            this.retryCount > 0
+          );
+        }
 
         // Save score
         if (this.currentLevel) {
@@ -603,6 +667,7 @@ export class GameScene extends Phaser.Scene {
           this.scene.start(SCENES.RESULTS, {
             levelId: this.currentLevel!.id,
             metrics,
+            retryCount: this.retryCount,
           });
         });
       }

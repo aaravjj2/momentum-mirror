@@ -27,9 +27,68 @@ async function performSwipe(page, rect, startOffsetX, startOffsetY, endOffsetX, 
   await page.mouse.move(sx, sy);
   await page.mouse.down();
   await sleep(100);
-  await page.mouse.move(ex, ey, { steps: 20 });
+  await page.mouse.move(ex, ey, { steps: 30 }); // Slower swipe for visibility
   await sleep(durationMs);
   await page.mouse.up();
+}
+
+async function playLevel(page, levelNum, x, y, rect) {
+  console.log(`--- Playing Level ${levelNum} ---`);
+  await smartClick(page, x, y, `Level ${levelNum}`);
+  await sleep(4000); // 4s to admire level
+
+  // Simulate thinking/planning
+  await sleep(2000);
+
+  // ACTION: Swipe
+  // Default swipe: Center-Right to Center-Left (Push Right)
+  // Most levels (1, 2, 4, 6, 8) benefit from this or similar.
+  // We'll vary it slightly to look "human".
+
+  // Randomize slightly
+  const variation = (Math.random() * 40) - 20;
+
+  // Swipe Left (Push Right)
+  // Start: (400, 540) -> End: (200, 540)
+  // Offsets from center (960, 540):
+  // StartX: -560. EndX: -760.
+
+  // For level 3 (Bounce), maybe swipe UP?
+  // Lvl 3 Start: (200, 200). Goal: (200, H-200). Downward.
+  // To go DOWN, Swipe UP.
+
+  let sx = -560;
+  let sy = 0;
+  let ex = -760;
+  let ey = 0;
+
+  if (levelNum === 3) {
+    // Swipe UP to go DOWN
+    // Center (960, 540). 
+    // Start near bottom, swipe up. 
+    sx = -600; // Left side
+    sy = 200;  // Below center
+    ex = -600;
+    ey = -200; // Above center
+  } else if (levelNum === 5) {
+    // Curved path. Start (200, H-200). Goal (W-200, 200).
+    // Needs diagonal Up-Right.
+    // Swipe Down-Left.
+    sx = -600;
+    sy = -200;
+    ex = -700;
+    ey = 0;
+  }
+
+  await performSwipe(page, rect, sx + variation, sy, ex + variation, ey, 500);
+
+  // Watch physics
+  await sleep(6000);
+
+  // Return to Level Select
+  console.log('Returning to Level Select');
+  await page.keyboard.press('Escape');
+  await sleep(3000);
 }
 
 (async () => {
@@ -52,14 +111,12 @@ async function performSwipe(page, rect, startOffsetX, startOffsetY, endOffsetX, 
   });
 
   const page = await browser.newPage();
-  await page.setViewport({ width: 1920, height: 1080 }); // 1080p for video
+  await page.setViewport({ width: 1920, height: 1080 });
 
   // Navigate
   const url = 'http://127.0.0.1:3001';
   console.log('Navigating and waiting for load...');
   await page.goto(url, { waitUntil: 'networkidle0', timeout: 60000 });
-
-  // Wait ample time for Phaser to boot
   await sleep(5000);
 
   // Get canvas
@@ -75,10 +132,8 @@ async function performSwipe(page, rect, startOffsetX, startOffsetY, endOffsetX, 
     await browser.close();
     return;
   }
-  console.log('Canvas found:', rect);
 
   // START VIDEO RECORDING
-  const videoPath = path.join(outDir, 'gameplay-demo.webm');
   const client = await page.target().createCDPSession();
   await client.send('Page.startScreencast', {
     format: 'png',
@@ -97,68 +152,70 @@ async function performSwipe(page, rect, startOffsetX, startOffsetY, endOffsetX, 
   });
   console.log('Started video recording...');
 
-  // --- RECORDING SEQUENCE ---
+  // --- RECORDING SEQUENCE (Target > 180s) ---
 
-  // 1. MENU (Wait 2s)
-  await sleep(2000);
+  // 1. MENU (5s)
+  await sleep(5000);
 
   // 2. CLICK PLAY
-  // MenuScene.ts: Play button at (960, 590)
   await smartClick(page, 960, 590, 'PLAY Button');
+  await sleep(4000); // 4s transition
 
-  // 3. LEVEL SELECT (Wait 2s)
-  await sleep(2000);
+  // 3. LEVEL LOOP
+  // Levels 1-5 (Row 1, Y=220)
+  // X coords: 280, 620, 960, 1300, 1640
+  const row1Y = 220;
+  const row1X = [280, 620, 960, 1300, 1640];
 
-  // 4. GAMEPLAY (Level 1)
-  // Level 1: (280, 220)
-  await smartClick(page, 280, 220, 'Level 1');
-  await sleep(3000); // Wait for transition
+  // Levels 6-10 (Row 2, Y=420)
+  // X coords: same
+  const row2Y = 420;
 
-  // Interact: Swipe Left (Push ball right)
-  // Center (960, 540). Swipe from (400, 540) to (200, 540).
-  // Offsets: -560 to -760
-  await performSwipe(page, rect, -560, 0, -760, 0, 300);
-  await sleep(4000); // Watch result
+  // Play Levels 1-8
+  const levels = [
+    { id: 1, x: row1X[0], y: row1Y },
+    { id: 2, x: row1X[1], y: row1Y },
+    { id: 3, x: row1X[2], y: row1Y },
+    { id: 4, x: row1X[3], y: row1Y },
+    { id: 5, x: row1X[4], y: row1Y },
+    { id: 6, x: row1X[0], y: row2Y },
+    { id: 7, x: row1X[1], y: row2Y },
+    { id: 8, x: row1X[2], y: row2Y },
+  ];
 
-  // Return to Level Select (Assume Escape)
-  await page.keyboard.press('Escape');
-  await sleep(2000);
+  for (const level of levels) {
+    await playLevel(page, level.id, level.x, level.y, rect);
+    // Each level takes ~15-20s. 8 levels * 17s = ~136s.
+    // + 9s setup = 145s.
+  }
 
-  // 5. Select Level 4 (Springs)
-  // Level 4: (1300, 220)
-  await smartClick(page, 1300, 220, 'Level 4');
+  // Scroll Level Select to show more levels?
+  console.log('Scrolling Level Select...');
+  await page.mouse.move(960, 800);
+  await page.mouse.wheel({ deltaY: 500 });
+  await sleep(3000);
+  await page.mouse.wheel({ deltaY: 500 });
   await sleep(3000);
 
-  // Interact: Swipe Right (Push ball left)
-  // Level 4 start (200, 540). Need swap LEFT to go RIGHT.
-  // Wait, description: "Green springs amplify... Hit goal across gap".
-  // Player start (200, 540). Goal (1720, 540).
-  // Yes, swipe LEFT to apply force RIGHT.
-  // Same swipe as Level 1 roughly.
-  await performSwipe(page, rect, -560, 0, -760, 0, 400);
-  await sleep(4000);
-
-  // Return
-  await page.keyboard.press('Escape');
-  await sleep(2000);
-
-  // Go back to Menu
+  // Back to Menu
   await page.goto(url, { waitUntil: 'networkidle0' });
-  await sleep(3000);
-
-  // 6. LEADERBOARD
-  // MenuScene.ts: Leaderboard button at (960, 670)
-  await smartClick(page, 960, 670, 'Leaderboard Button');
   await sleep(4000);
+
+  // 4. LEADERBOARD (10s)
+  await smartClick(page, 960, 670, 'Leaderboard Button');
+  await sleep(10000); // Read time
 
   // Back to Menu
   await page.goto(url, { waitUntil: 'networkidle0' });
   await sleep(3000);
 
-  // 7. HOW TO PLAY
-  // MenuScene.ts: How to Play button at (960, 750)
+  // 5. HOW TO PLAY (10s)
   await smartClick(page, 960, 750, 'How to Play Button');
-  await sleep(5000); // Read time
+  await sleep(10000); // Read time
+
+  // Total est: 145 + 6 + 4 + 10 + 3 + 10 = ~178s.
+  // Add padding
+  await sleep(5000);
 
   // STOP RECORDING
   console.log('Stopping video recording...');

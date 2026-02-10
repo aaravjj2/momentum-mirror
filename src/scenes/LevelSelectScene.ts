@@ -66,7 +66,7 @@ export class LevelSelectScene extends Phaser.Scene {
     this.container = this.add.container(0, 0);
 
     // Group levels by category
-    const categories: LevelCategory[] = ['tutorial', 'efficiency', 'rhythm', 'precision', 'hybrid'];
+    const categories: LevelCategory[] = ['tutorial', 'efficiency', 'rhythm', 'precision', 'hybrid', 'master'];
     let yOffset = 120;
 
     for (const category of categories) {
@@ -137,7 +137,7 @@ export class LevelSelectScene extends Phaser.Scene {
     x: number, y: number, w: number, h: number,
     level: typeof LEVELS[0], categoryColor: number
   ): void {
-    const unlocked = true; // FORCE UNLOCK FOR CAPTURE
+    const unlocked = isLevelUnlocked(level.id);
     const best = getBestScore(level.id);
     const isCompleted = best !== null;
 

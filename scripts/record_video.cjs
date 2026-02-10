@@ -115,6 +115,24 @@ async function playLevel(page, levelNum, x, y, rect) {
   await page.setViewport({ width: 1920, height: 1080 });
 
   // Navigate
+  // Inject localStorage to unlock levels 1-5 and set some dummy progress
+  await page.evaluateOnNewDocument(() => {
+    localStorage.clear();
+    localStorage.setItem('mm_unlocked_levels', JSON.stringify([1, 2, 3, 4, 5]));
+    const bestScores = {};
+    for (let i = 1; i <= 5; i++) {
+      bestScores[i] = {
+        compositeScore: 950,
+        efficiencyScore: 100,
+        conservationScore: 100,
+        rhythmScore: 100,
+        timestamp: Date.now(),
+        skillRating: 'S'
+      };
+    }
+    localStorage.setItem('mm_best_scores', JSON.stringify(bestScores));
+  });
+
   const url = 'http://127.0.0.1:3001';
   console.log('Navigating and waiting for load...');
   await page.goto(url, { waitUntil: 'networkidle0', timeout: 60000 });
@@ -153,70 +171,60 @@ async function playLevel(page, levelNum, x, y, rect) {
   });
   console.log('Started video recording...');
 
-  // --- RECORDING SEQUENCE (Target > 180s) ---
+  // --- RECORDING SEQUENCE ---
 
-  // 1. MENU (5s)
-  await sleep(5000);
+  // 1. MENU (3s)
+  await sleep(3000);
 
   // 2. CLICK PLAY
   await smartClick(page, 960, 590, 'PLAY Button');
   await sleep(4000); // 4s transition
 
   // 3. LEVEL LOOP
-  // Levels 1-5 (Row 1, Y=220)
-  // X coords: 280, 620, 960, 1300, 1640
+  // Play Levels 1 & 2 ONLY
   const row1Y = 220;
   const row1X = [280, 620, 960, 1300, 1640];
 
-  // Levels 6-10 (Row 2, Y=420)
-  // X coords: same
-  const row2Y = 420;
-
-  // Play Levels 1-8
   const levels = [
     { id: 1, x: row1X[0], y: row1Y },
     { id: 2, x: row1X[1], y: row1Y },
-    { id: 3, x: row1X[2], y: row1Y },
-    { id: 4, x: row1X[3], y: row1Y },
-    { id: 5, x: row1X[4], y: row1Y },
-    { id: 6, x: row1X[0], y: row2Y },
-    { id: 7, x: row1X[1], y: row2Y },
-    { id: 8, x: row1X[2], y: row2Y },
   ];
 
   for (const level of levels) {
     await playLevel(page, level.id, level.x, level.y, rect);
-    // Each level takes ~15-20s. 8 levels * 17s = ~136s.
-    // + 9s setup = 145s.
   }
 
-  // Scroll Level Select to show more levels?
-  console.log('Scrolling Level Select...');
+  // Scroll Level Select to show all levels (including Master at bottom)
+  console.log('Scrolling Level Select to show Master levels...');
+  // Move mouse to center
   await page.mouse.move(960, 800);
-  await page.mouse.wheel({ deltaY: 500 });
-  await sleep(3000);
-  await page.mouse.wheel({ deltaY: 500 });
-  await sleep(3000);
+  // Scroll down a lot to reach bottom (Level 40)
+  // Total heigh estim: ~4000px?
+  for (let i = 0; i < 5; i++) {
+    await page.mouse.wheel({ deltaY: 800 });
+    await sleep(1000);
+  }
+  await sleep(2000); // Pause at bottom
+
+  // Scroll back up slightly?
+  // await page.mouse.wheel({ deltaY: -1000 });
+  // await sleep(1000);
 
   // Back to Menu
+  console.log('Returning to Main Menu...');
+  await smartClick(page, 80, 80, 'Back to Menu'); // Assuming generic back button or just reload?
+  // Actually the level select scene might not have a "Back to Menu" button easily accessible or logic is different.
+  // The script previously just went to URL.
   await page.goto(url, { waitUntil: 'networkidle0' });
-  await sleep(4000);
+  await sleep(3000);
 
-  // 4. LEADERBOARD (10s)
+  // 4. LEADERBOARD (5s)
   await smartClick(page, 960, 670, 'Leaderboard Button');
-  await sleep(10000); // Read time
+  await sleep(5000);
 
   // Back to Menu
   await page.goto(url, { waitUntil: 'networkidle0' });
   await sleep(3000);
-
-  // 5. HOW TO PLAY (10s)
-  await smartClick(page, 960, 750, 'How to Play Button');
-  await sleep(10000); // Read time
-
-  // Total est: 145 + 6 + 4 + 10 + 3 + 10 = ~178s.
-  // Add padding
-  await sleep(5000);
 
   // STOP RECORDING
   console.log('Stopping video recording...');
@@ -233,16 +241,19 @@ async function playLevel(page, levelNum, x, y, rect) {
     // Save frames
     console.log('Saving frames to disk...');
     for (let i = 0; i < frames.length; i++) {
+      // file operations...
       const framePath = path.join(framesDir, `frame_${String(i).padStart(5, '0')}.png`);
       fs.writeFileSync(framePath, Buffer.from(frames[i], 'base64'));
     }
 
     // Convert
-    console.log('Converting to MP4...');
+    console.log('Converting to MP4 with 1.5x speedup...');
     const ffmpegPath = path.join(outDir, 'gameplay-demo.mp4');
     const { execSync } = require('child_process');
     try {
-      execSync(`ffmpeg -y -framerate 30 -i "${framesDir}/frame_%05d.png" -c:v libx264 -pix_fmt yuv420p "${ffmpegPath}"`, { stdio: 'inherit' });
+      // vf "setpts=PTS/1.5" speeds up video (drops frames / adjusts timestamps)
+      // To keep audio synced (if there was audio) we'd need atempo. Here just video.
+      execSync(`ffmpeg -y -framerate 30 -i "${framesDir}/frame_%05d.png" -vf "setpts=PTS/1.5" -c:v libx264 -pix_fmt yuv420p "${ffmpegPath}"`, { stdio: 'inherit' });
       console.log(`Video saved to ${ffmpegPath}`);
     } catch (e) {
       console.error('FFmpeg conversion failed:', e.message);

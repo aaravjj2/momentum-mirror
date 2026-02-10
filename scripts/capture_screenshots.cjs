@@ -81,9 +81,34 @@ async function captureLevel(page, levelNum, x, y, outDir, captureAction = false,
   await page.setViewport({ width: 1920, height: 1080 });
 
   // Navigate
-  const url = 'http://127.0.0.1:3001';
+  // Inject localStorage to unlock levels 1-5 and set some dummy progress for "Completed" count
+  await page.evaluateOnNewDocument(() => {
+    localStorage.clear();
+    // Unlock levels 1-5
+    // Key: 'mm_unlocked_levels' -> JSON array of level IDs
+    localStorage.setItem('mm_unlocked_levels', JSON.stringify([1, 2, 3, 4, 5]));
+
+    // Set some best scores to make them appear "completed" (green) if needed, 
+    // or just unlocked. The UI shows "completed" count based on best scores.
+    // Key: 'mm_best_scores' -> JSON object { levelId: { ... } }
+    const bestScores = {};
+    for (let i = 1; i <= 5; i++) {
+      bestScores[i] = {
+        compositeScore: 950,
+        efficiencyScore: 100,
+        conservationScore: 100,
+        rhythmScore: 100,
+        timestamp: Date.now(),
+        skillRating: 'S'
+      };
+    }
+    localStorage.setItem('mm_best_scores', JSON.stringify(bestScores));
+  });
+
+  const url = 'http://127.0.0.1:3001'; // Local dev
   console.log('Navigating and waiting for load...');
-  await page.goto(url, { waitUntil: 'networkidle0', timeout: 60000 });
+  await page.goto(url, { waitUntil: 'networkidle0' });
+  await sleep(2000);
 
   // Wait ample time for Phaser to boot
   await sleep(5000);

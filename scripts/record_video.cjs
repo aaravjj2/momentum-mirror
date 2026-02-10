@@ -103,20 +103,21 @@ async function performSwipe(page, rect, startOffsetX, startOffsetY, endOffsetX, 
   await sleep(2000);
 
   // 2. CLICK PLAY
-  // MenuScene.ts: Play button is at (cx, cy + 50)
-  const cx = Math.floor(rect.left + rect.width / 2);
-  const cy = Math.floor(rect.top + rect.height / 2 + 50);
-  await smartClick(page, cx, cy, 'PLAY Button');
+  // MenuScene.ts: Play button at (960, 590)
+  await smartClick(page, 960, 590, 'PLAY Button');
 
   // 3. LEVEL SELECT (Wait 2s)
   await sleep(2000);
 
   // 4. GAMEPLAY (Level 1)
-  await smartClick(page, 420, 320, 'Level 1');
+  // Level 1: (280, 220)
+  await smartClick(page, 280, 220, 'Level 1');
   await sleep(3000); // Wait for transition
 
-  // Interact: Swipe 1
-  await performSwipe(page, rect, 50, 0, -100, 0, 300);
+  // Interact: Swipe Left (Push ball right)
+  // Center (960, 540). Swipe from (400, 540) to (200, 540).
+  // Offsets: -560 to -760
+  await performSwipe(page, rect, -560, 0, -760, 0, 300);
   await sleep(4000); // Watch result
 
   // Return to Level Select (Assume Escape)
@@ -124,12 +125,17 @@ async function performSwipe(page, rect, startOffsetX, startOffsetY, endOffsetX, 
   await sleep(2000);
 
   // 5. Select Level 4 (Springs)
-  // Assuming Level 4 is at (520, 320) per previous script
-  await smartClick(page, 520, 320, 'Level 4');
+  // Level 4: (1300, 220)
+  await smartClick(page, 1300, 220, 'Level 4');
   await sleep(3000);
 
-  // Interact: Swipe 2
-  await performSwipe(page, rect, -80, 0, 120, 0, 400);
+  // Interact: Swipe Right (Push ball left)
+  // Level 4 start (200, 540). Need swap LEFT to go RIGHT.
+  // Wait, description: "Green springs amplify... Hit goal across gap".
+  // Player start (200, 540). Goal (1720, 540).
+  // Yes, swipe LEFT to apply force RIGHT.
+  // Same swipe as Level 1 roughly.
+  await performSwipe(page, rect, -560, 0, -760, 0, 400);
   await sleep(4000);
 
   // Return
@@ -137,15 +143,12 @@ async function performSwipe(page, rect, startOffsetX, startOffsetY, endOffsetX, 
   await sleep(2000);
 
   // Go back to Menu
-  await page.keyboard.press('Escape'); // Again to menu? Or use direct Nav?
-  // Let's use robust navigation for video cleanliness
   await page.goto(url, { waitUntil: 'networkidle0' });
   await sleep(3000);
 
   // 6. LEADERBOARD
-  // MenuScene.ts: Leaderboard button is at (cx, cy + 130)
-  const cyLb = Math.floor(rect.top + rect.height / 2 + 130);
-  await smartClick(page, cx, cyLb, 'Leaderboard Button');
+  // MenuScene.ts: Leaderboard button at (960, 670)
+  await smartClick(page, 960, 670, 'Leaderboard Button');
   await sleep(4000);
 
   // Back to Menu
@@ -153,9 +156,8 @@ async function performSwipe(page, rect, startOffsetX, startOffsetY, endOffsetX, 
   await sleep(3000);
 
   // 7. HOW TO PLAY
-  // MenuScene.ts: How to Play button is at (cx, cy + 210)
-  const cyHow = Math.floor(rect.top + rect.height / 2 + 210);
-  await smartClick(page, cx, cyHow, 'How to Play Button');
+  // MenuScene.ts: How to Play button at (960, 750)
+  await smartClick(page, 960, 750, 'How to Play Button');
   await sleep(5000); // Read time
 
   // STOP RECORDING
@@ -180,14 +182,10 @@ async function performSwipe(page, rect, startOffsetX, startOffsetY, endOffsetX, 
     // Convert
     console.log('Converting to MP4...');
     const ffmpegPath = path.join(outDir, 'gameplay-demo.mp4');
-    // Using simple exec for now, could use fluent-ffmpeg if installed
     const { execSync } = require('child_process');
     try {
       execSync(`ffmpeg -y -framerate 30 -i "${framesDir}/frame_%05d.png" -c:v libx264 -pix_fmt yuv420p "${ffmpegPath}"`, { stdio: 'inherit' });
       console.log(`Video saved to ${ffmpegPath}`);
-
-      // Cleanup frames
-      // fs.rmSync(framesDir, { recursive: true, force: true });
     } catch (e) {
       console.error('FFmpeg conversion failed:', e.message);
     }

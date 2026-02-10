@@ -47,12 +47,12 @@ async function performSwipe(page, rect, startOffsetX, startOffsetY, endOffsetX, 
       '--use-gl=egl',
       '--ignore-gpu-blocklist',
       '--enable-webgl',
-      '--window-size=1280,720',
+      '--window-size=1920,1080', // Force 1080p to match game config
     ],
   });
 
   const page = await browser.newPage();
-  await page.setViewport({ width: 1280, height: 720 });
+  await page.setViewport({ width: 1920, height: 1080 });
 
   // Navigate
   const url = 'http://127.0.0.1:3001';
@@ -82,44 +82,40 @@ async function performSwipe(page, rect, startOffsetX, startOffsetY, endOffsetX, 
   await page.screenshot({ path: path.join(outDir, '01-menu.png') });
 
   // 2. CLICK PLAY
-  // MenuScene.ts: Play button is at (cx, cy + 50)
-  const cx = Math.floor(rect.left + rect.width / 2);
-  const cy = Math.floor(rect.top + rect.height / 2 + 50);
-  await smartClick(page, cx, cy, 'PLAY Button');
+  // MenuScene.ts: Play button at (cx, cy + 50) -> (960, 590)
+  await smartClick(page, 960, 590, 'PLAY Button');
 
   // 3. LEVEL SELECT (Now all unlocked)
   console.log('Taking Level Select screenshot...');
   await page.screenshot({ path: path.join(outDir, '02-level-select.png') });
 
   // 4. GAMEPLAY (Level 1)
-  await smartClick(page, 420, 320, 'Level 1');
+  // Level 1: (280, 220)
+  await smartClick(page, 280, 220, 'Level 1');
   await sleep(3000); // Wait for transition
   console.log('Taking Level 1 initial screenshot...');
   await page.screenshot({ path: path.join(outDir, '03-level1-gameplay.png') });
 
-  // Interact
-  await performSwipe(page, rect, 50, 0, -100, 0, 300);
+  // Interact: Swipe Left (Push ball right)
+  // Center is (960, 540). Swipe from center-right to left? 
+  // Level 1: Ball at (300, 540). Goal at (1620, 540).
+  // Need to swipe LEFT to push RIGHT (opposite).
+  // Swipe from (400, 540) to (200, 540).
+  // Relative to center (960, 540):
+  // Start: 400 - 960 = -560.
+  // End: 200 - 960 = -760.
+  await performSwipe(page, rect, -560, 0, -760, 0, 300);
   await sleep(500);
   console.log('Taking Level 1 action screenshot...');
   await page.screenshot({ path: path.join(outDir, '04-level1-action.png') });
 
-  await sleep(2000);
-  await page.keyboard.press('Escape'); // Pause? Or Back? Assuming Escape goes back or pauses
-  await sleep(1000);
-  console.log('Pressing Escape to return...');
-
-  // Return to Level Select (may need multiple Escapes or clicks depending on game logic)
-  // Let's assume clicking specific coordinates for "Menu" button if visible, or Escape
-  // Based on code, Escape might just pause. LevelSelectScene had a back button at (50, 40)
-
-  // Let's try navigating back to Menu via URL reload for simplicity and robustness for Leaderboard/HowToPlay
+  // Return to Menu
   await page.goto(url, { waitUntil: 'networkidle0' });
   await sleep(3000);
 
   // 5. LEADERBOARD
-  // MenuScene.ts: Leaderboard button is at (cx, cy + 130)
-  const cyLb = Math.floor(rect.top + rect.height / 2 + 130);
-  await smartClick(page, cx, cyLb, 'Leaderboard Button'); // cx is already defined above
+  // MenuScene.ts: Leaderboard button at (cx, cy + 130) -> (960, 670)
+  await smartClick(page, 960, 670, 'Leaderboard Button');
   await sleep(3000);
   console.log('Taking Leaderboard screenshot...');
   await page.screenshot({ path: path.join(outDir, '05-leaderboard.png') });
@@ -129,9 +125,8 @@ async function performSwipe(page, rect, startOffsetX, startOffsetY, endOffsetX, 
   await sleep(3000);
 
   // 6. HOW TO PLAY
-  // MenuScene.ts: How to Play button is at (cx, cy + 210)
-  const cyHow = Math.floor(rect.top + rect.height / 2 + 210);
-  await smartClick(page, cx, cyHow, 'How to Play Button');
+  // MenuScene.ts: How to Play button at (cx, cy + 210) -> (960, 750)
+  await smartClick(page, 960, 750, 'How to Play Button');
 
   await sleep(2000);
   console.log('Taking How to Play screenshot...');

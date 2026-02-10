@@ -117,24 +117,36 @@ async function captureLevel(page, levelNum, x, y, outDir, captureAction = false,
   await page.screenshot({ path: path.join(outDir, '02-level-select.png') });
 
   // 4. LEVEL CAPTURES
-  // Level 1: (280, 220) - Capture Action too
-  // Pass rect for action capture
-  await captureLevel(page, 1, 280, 220, outDir, true, rect); // Saves 03-level1.png
+  // Note: Level 1 and 5 are preserved/skipped as per user request.
+  // Level 1 was likely correct. Level 5 is a "completion report" to be kept.
 
-  // Level 2: (620, 220)
-  await captureLevel(page, 2, 620, 220, outDir); // Saves 04-level2.png
+  // Back button coordinates in GameScene: (1920 - 250) + offset approx (1700, 40)
+  const backBtnX = 1700;
+  const backBtnY = 40;
 
-  // Level 3: (960, 220)
-  await captureLevel(page, 3, 960, 220, outDir); // Saves 05-level3.png
+  async function captureSpecificLevel(lvlNum, x, y) {
+    await smartClick(page, x, y, `Level ${lvlNum}`);
+    await sleep(3000);
+    console.log(`Taking Level ${lvlNum} screenshot...`);
+    await page.screenshot({ path: path.join(outDir, `0${2 + lvlNum}-level${lvlNum}.png`) });
 
-  // Level 4: (1300, 220)
-  await captureLevel(page, 4, 1300, 220, outDir); // Saves 06-level4.png
+    // Return to Level Select via UI Button
+    await smartClick(page, backBtnX, backBtnY, 'Back to Levels');
+    await sleep(3000);
+  }
 
-  // Level 5: (1640, 220)
-  await captureLevel(page, 5, 1640, 220, outDir); // Saves 07-level5.png
+  // Level 2
+  await captureSpecificLevel(2, 620, 220);
 
-  // Return to Menu
-  await page.goto(url, { waitUntil: 'networkidle0' });
+  // Level 3
+  await captureSpecificLevel(3, 960, 220);
+
+  // Level 4
+  await captureSpecificLevel(4, 1300, 220);
+
+  // Return to Menu from Level Select
+  // Back button on Level Select is at top left (50, 40)
+  await smartClick(page, 80, 50, 'Back to Menu');
   await sleep(3000);
 
   // 5. LEADERBOARD

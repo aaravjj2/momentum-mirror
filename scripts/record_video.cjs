@@ -87,7 +87,8 @@ async function playLevel(page, levelNum, x, y, rect) {
 
   // Return to Level Select
   console.log('Returning to Level Select');
-  await page.keyboard.press('Escape');
+  // GameScene back button is at approx (1700, 40)
+  await smartClick(page, 1700, 40, 'Back to Levels');
   await sleep(3000);
 }
 

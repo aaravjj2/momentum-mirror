@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { SCENES, RENDER } from '../config';
-import { getPlayerProgress } from '../utils/Storage';
+import { loadProgress } from '../utils/Storage';
 import { LEVELS } from '../levels/LevelData';
 import { getAudioManager } from '../audio/AudioManager';
 
@@ -57,7 +57,7 @@ export class LeaderboardScene extends Phaser.Scene {
     }).setOrigin(0.5).setDepth(10);
 
     // Get player progress and create leaderboard
-    const progress = getPlayerProgress();
+    const progress = loadProgress();
     const entries: LeaderboardEntry[] = [];
 
     for (const levelId in progress.bestScores) {

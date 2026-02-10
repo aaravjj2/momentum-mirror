@@ -66,7 +66,8 @@ export type LevelCategory =
   | 'efficiency'
   | 'rhythm'
   | 'precision'
-  | 'hybrid';
+  | 'hybrid'
+  | 'master';
 
 export interface PhaseWallDefinition extends WallDefinition {
   period: number;
@@ -85,6 +86,7 @@ export interface MetricsSnapshot {
   totalBounces: number;
   completionTime: number;
   distanceTraveled: number;
+  timestamp?: number;
 }
 
 export interface ReplayFrame {
